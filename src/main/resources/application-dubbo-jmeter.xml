@@ -11,12 +11,12 @@
 		<property name="ignoreResourceNotFound" value="true" />
 		<property name="locations">
 			<list>
-				<value>classpath:test-dubbo.properties</value>
+				<value>classpath:jmeter-dubbo.properties</value>
 			</list>
 		</property>
 	</bean>
 	
-	<dubbo:application name="dubbo-test" />
+	<dubbo:application name="jmeter" />
 
 	<dubbo:registry server="zkRegistry" protocol="${dubbo.registry.protocol}" address="${dubbo.registry.address}" file="${dubbo.registry.file}" />
 	<!-- <dubbo:monitor address="${dubbo.monitor.address}" /> -->

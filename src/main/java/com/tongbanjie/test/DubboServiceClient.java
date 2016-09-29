@@ -26,6 +26,7 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -61,7 +62,7 @@ public class DubboServiceClient extends AbstractJavaSamplerClient {
     private <T> T getBean(String clazzName, String version, String url, long timeout, Class<T> t) {
         try {
             return context.getBean(clazzName + version + url + timeout, t);
-        } catch (RuntimeException e) {
+        } catch (NoSuchBeanDefinitionException e) {
             return null;
         }
     }
@@ -70,8 +71,11 @@ public class DubboServiceClient extends AbstractJavaSamplerClient {
         if (getBean(clazz.getName(), version, url, timeout, clazz) != null) {
             return getBean(clazz.getName(), version, url, timeout, clazz);
         }
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ReferenceBean.class).addPropertyValue("interface", clazz.getName()).addPropertyValue("url", url)
-            .addPropertyValue("version", version).addPropertyValue("timeout", timeout);
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ReferenceBean.class).addPropertyValue("interface", clazz.getName()).addPropertyValue("version", version)
+            .addPropertyValue("timeout", timeout);
+        if (!StringUtils.isEmpty(url.trim())) {
+            builder = builder.addPropertyValue("url", url);
+        }
         context.registerBeanDefinition(clazz.getName() + version + url + timeout, builder.getBeanDefinition());
         return getBean(clazz.getName(), version, url, timeout, clazz);
     }
@@ -188,7 +192,7 @@ public class DubboServiceClient extends AbstractJavaSamplerClient {
         arguments.addArgument("接口名(必填)", "com.tongbanjie.feeclcn.facade.api.FeeclcnFacade");
         arguments.addArgument("方法名(必填)", "normalFeeclcn");
         arguments.addArgument("方法参数类型数组(必填)", "['com.tongbanjie.feeclcn.facade.request.FeeclcnRequest','java.lang.String']");
-        arguments.addArgument("服务器地址(必填)", "dubbo://127.0.0.1:18178/");
+        arguments.addArgument("服务器地址(为空则需要设置zk.jmeter对应的ip)", "dubbo://127.0.0.1:18178/");
         arguments.addArgument("版本(必填)", "2.0");
         arguments.addArgument("超时时间,单位ms(必填)", "6000");
         arguments.addArgument("请求参数1", "");
